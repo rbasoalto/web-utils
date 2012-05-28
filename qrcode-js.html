@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>QRcode-js</title>
+<script type="text/javascript" src="jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="jquery.qrcode.min.js"></script>
+<script type="text/javascript">
+function processForm() {
+$("#qrcode").replaceWith('<div id="qrcode"></div>');
+$("#qrcode").qrcode($('#text').val());
+return false;
+}
+function textarea() {
+var prevText = $('#text').val();
+if($('#text').is('textarea')) {
+  //it's a textarea, replace with input!
+  $('#text').replaceWith('<input type="text" name="text" id="text" value="'+prevText+'"/>');
+} else {
+  $('#text').replaceWith('<textarea name="text" id="text">'+prevText+'</textarea>');
+}
+}
+</script>
+<style type="text/css">
+div {
+  margin: 30px;
+}
+</style>
+</head>
+<body>
+<div id="form">
+<form action="#" onsubmit="return processForm()">
+<input type="text" name="text" id="text"/>
+<input type="submit" name="submit" value="QR!" id="submit"/>
+<a href="#" onclick="textarea()">[Toggle Textarea]</a>
+</form>
+</div>
+<div id="qrcode"></div>
+</body>
+</html>
