@@ -2,7 +2,8 @@
 <html>
 <head>
 <title>URLDecode</title>
-<script language="javascript" type="text/javascript">
+<script type="text/javascript" src="jquery-1.7.2.min.js"></script>
+<script type="text/javascript">
 function urldecode() {
 try {
   try {
@@ -86,13 +87,23 @@ function recompute(str) {
   document.getElementById('input').value = str;
   urldecode();
 }
+function textarea() {
+var prevText = $('#input').val();
+if($('#input').is('textarea')) {
+  //it's a textarea, replace with input!
+  $('#input').replaceWith('<input type="text" name="input" id="input" value="'+prevText+'"/>');
+} else {
+  $('#input').replaceWith('<textarea name="input" id="input">'+prevText+'</textarea>');
+}
+}
 </script>
 </head>
 <body>
 <div id="formulario">
 <form action="#" id="formtag" method="POST" onsubmit="return urldecode();">
-<textarea name="input" id="input"></textarea>
+<input type="text" name="input" id="input" size="100"/>
 <input type="submit" name="submit" value="URLDecode!"/>
+<a href="#" onclick="textarea()">[Toggle Textarea]</a>
 </form>
 </div>
 <div id="container">
