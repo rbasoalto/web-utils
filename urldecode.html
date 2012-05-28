@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>URLDecode</title>
+<script language="javascript" type="text/javascript">
+function urldecode() {
+try {
+  try {
+    x = document.getElementById('resultado');
+    x.parentNode.removeChild(x);
+  } catch (e) {}
+  var cont = document.getElementById('container');
+  var res = document.createElement('div');
+  res.id = 'resultado';
+
+  var input = document.getElementById('input').value;
+
+  var regex = /(https?:\/\/[^?]+)(\?(.*))?/g;
+  var matches = regex.exec(input);
+
+  if (matches == null) {
+    res.appendChild(document.createTextNode("No URL found :("));
+  } else {
+    // List it structurally
+    var ul = document.createElement('ul');
+    //base URL
+    var li = document.createElement('li');
+    var strong = document.createElement('strong');
+    strong.appendChild(document.createTextNode("Base URL: "));
+    li.appendChild(strong);
+    var link = document.createElement('a');
+    link.href = matches[1];
+    link.appendChild(document.createTextNode(matches[1]));
+    li.appendChild(link);
+    ul.appendChild(li);
+
+    var paramsli = document.createElement('li');
+    strong = document.createElement('strong');
+    strong.appendChild(document.createTextNode('Query String Params: '));
+    paramsli.appendChild(strong);
+    paramsli.appendChild(document.createElement('br'));
+    var paramsul = document.createElement('ul');
+    
+    if ( matches.length > 3 ) {
+    var params = matches[3].split('&');
+      for ( i in params) {
+        var assign = params[i].split('=');
+        li = document.createElement('li');
+        strong = document.createElement('strong');
+        strong.appendChild(document.createTextNode(unescape(assign[0]) + ": "));
+        li.appendChild(strong);
+        assign[1] = unescape(assign[1]);
+        if (regex.test(assign[1])) {
+          var link = document.createElement('a');
+          link.href = assign[1];
+          link.appendChild(document.createTextNode(assign[1]));
+          li.appendChild(link);
+          li.appendChild(document.createTextNode(" "));
+          link = document.createElement('a');
+          link.href = "#";
+          link.setAttribute('onclick',"recompute(unescape('"+escape(assign[1])+"'));");
+          link.appendChild(document.createTextNode("[decode this url]"));
+          li.appendChild(link);
+        } else {
+          li.appendChild(document.createTextNode(assign[1]));
+        }
+        paramsul.appendChild(li);
+      }
+    } else {
+    }
+    paramsli.appendChild(paramsul);
+    ul.appendChild(paramsli);
+
+    res.appendChild(ul);
+  }
+
+  cont.appendChild(res);
+
+} catch (a) {
+  alert(a);
+}
+return false;
+}
+
+function recompute(str) {
+  document.getElementById('input').value = str;
+  urldecode();
+}
+</script>
+</head>
+<body>
+<div id="formulario">
+<form action="#" id="formtag" method="POST" onsubmit="return urldecode();">
+<textarea name="input" id="input"></textarea>
+<input type="submit" name="submit" value="URLDecode!"/>
+</form>
+</div>
+<div id="container">
+</div>
+</body>
+</html>

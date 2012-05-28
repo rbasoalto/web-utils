@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>QRCode!</title>
+<script language="javascript" type="text/javascript">
+function process() {
+var apiurl = "https://chart.googleapis.com/chart";
+
+var els = document.forms["theform"].elements;
+var el;
+var i = 0;
+
+var querystring = "?";
+
+while (null != (el = els.item(i++))) {
+  querystring += escape(el.name) + "=" + escape(el.value) + "&";
+}
+
+var resultado = document.getElementById('resultado');
+var basura = resultado.childNodes;
+var basurita;
+i = 0;
+
+while (null != (basurita = basura.item(i++))) {
+  resultado.removeChild(basurita);
+}
+
+var img = document.createElement('img');
+img.src = apiurl + querystring;
+
+resultado.appendChild(img);
+
+return false;
+}
+</script>
+</head>
+<body>
+<h1>QR Code Generator</h1>
+<div>
+<form action="#" onsubmit="return process();" method="POST" id="theform" name="theform">
+<textarea name="chl" id="chl"></textarea>
+<select name="chld" id="chld">
+<option value="L" selected="selected">L (7%)</option>
+<option value="M">M (15%)</option>
+<option value="Q">Q (25%)</option>
+<option value="H">H (30%)</option>
+</select>
+<input type="hidden" name="choe" value="UTF-8" id="choe"/>
+<input type="hidden" name="chs" value="300x300" id="chs"/>
+<input type="hidden" name="cht" value="qr" id="cht"/>
+<input type="submit" name="submit" value="QR!"/>
+</form>
+</div>
+<div id="resultado">
+</div>
+</body>
+</html>
