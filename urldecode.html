@@ -16,7 +16,7 @@ try {
 
   var input = document.getElementById('input').value;
 
-  var regex = /(https?:\/\/[^?]+)(\?(.*))?/g;
+  var regex = /(https?:\/\/[^?]+)(\?(.*))?/;
   var matches = regex.exec(input);
 
   if (matches == null) {
@@ -41,10 +41,11 @@ try {
     paramsli.appendChild(strong);
     paramsli.appendChild(document.createElement('br'));
     var paramsul = document.createElement('ul');
-    
-    if ( matches.length > 3 ) {
-    var params = matches[3].split('&');
+    var nparams = 0;
+    if ( matches.length > 3 && matches[3]) {
+      var params = matches[3].split('&');
       for ( i in params) {
+        nparams++;
         var assign = params[i].split('=');
         li = document.createElement('li');
         strong = document.createElement('strong');
@@ -70,7 +71,7 @@ try {
     } else {
     }
     paramsli.appendChild(paramsul);
-    ul.appendChild(paramsli);
+    if (nparams > 0) ul.appendChild(paramsli);
 
     res.appendChild(ul);
   }
