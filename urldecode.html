@@ -1,113 +1,167 @@
 <!DOCTYPE html>
 <html>
-<head>
-<title>URLDecode</title>
-<script type="text/javascript" src="jquery-1.7.2.min.js"></script>
-<script type="text/javascript">
-function urldecode() {
-try {
-  try {
-    x = document.getElementById('resultado');
-    x.parentNode.removeChild(x);
-  } catch (e) {}
-  var cont = document.getElementById('container');
-  var res = document.createElement('div');
-  res.id = 'resultado';
-
-  var input = document.getElementById('input').value;
-
-  var regex = /(https?:\/\/[^?]+)(\?(.*))?/;
-  var matches = regex.exec(input);
-
-  if (matches == null) {
-    res.appendChild(document.createTextNode("No URL found :("));
-  } else {
-    // List it structurally
-    var ul = document.createElement('ul');
-    //base URL
-    var li = document.createElement('li');
-    var strong = document.createElement('strong');
-    strong.appendChild(document.createTextNode("Base URL: "));
-    li.appendChild(strong);
-    var link = document.createElement('a');
-    link.href = matches[1];
-    link.appendChild(document.createTextNode(matches[1]));
-    li.appendChild(link);
-    ul.appendChild(li);
-
-    var paramsli = document.createElement('li');
-    strong = document.createElement('strong');
-    strong.appendChild(document.createTextNode('Query String Params: '));
-    paramsli.appendChild(strong);
-    paramsli.appendChild(document.createElement('br'));
-    var paramsul = document.createElement('ul');
-    var nparams = 0;
-    if ( matches.length > 3 && matches[3]) {
-      var params = matches[3].split('&');
-      for ( i in params) {
-        nparams++;
-        var assign = params[i].split('=');
-        li = document.createElement('li');
-        strong = document.createElement('strong');
-        strong.appendChild(document.createTextNode(unescape(assign[0]) + ": "));
-        li.appendChild(strong);
-        assign[1] = unescape(assign[1]);
-        if (regex.test(assign[1])) {
-          var link = document.createElement('a');
-          link.href = assign[1];
-          link.appendChild(document.createTextNode(assign[1]));
-          li.appendChild(link);
-          li.appendChild(document.createTextNode(" "));
-          link = document.createElement('a');
-          link.href = "#";
-          link.setAttribute('onclick',"recompute(unescape('"+escape(assign[1])+"'));");
-          link.appendChild(document.createTextNode("[decode this url]"));
-          li.appendChild(link);
-        } else {
-          li.appendChild(document.createTextNode(assign[1]));
-        }
-        paramsul.appendChild(li);
+  <head>
+    <title>URLDecode</title>
+    <script type="text/javascript">
+      var __gen_id_count = 0;
+      /**
+       * Generates a sequential unique id
+       */
+      function genId() {
+        ++__gen_id_count;
+        return `_cont_${__gen_id_count}`;
       }
-    } else {
-    }
-    paramsli.appendChild(paramsul);
-    if (nparams > 0) ul.appendChild(paramsli);
 
-    res.appendChild(ul);
-  }
+      /**
+       * Logs an error to a list at the bottom
+       */
+      function logError(text) {
+        const log = document.createElement("li");
+        log.textContent = text;
+        document.getElementById("errorlog").appendChild(log);
+      }
 
-  cont.appendChild(res);
+      function safeParseURL(text) {
+        try {
+          return new URL(text);
+        } catch (err) {}
+        return null;
+      }
 
-} catch (a) {
-  alert(a);
-}
-return false;
-}
+      function makeText(text) {
+        return document.createTextNode(text);
+      }
 
-function recompute(str) {
-  document.getElementById('input').value = str;
-  urldecode();
-}
-function textarea() {
-var prevText = $('#input').val();
-if($('#input').is('textarea')) {
-  //it's a textarea, replace with input!
-  $('#input').replaceWith('<input type="text" name="input" id="input" value="'+prevText+'"/>');
-} else {
-  $('#input').replaceWith('<textarea name="input" id="input">'+prevText+'</textarea>');
-}
-}
-</script>
-</head>
-<body>
-<div id="formulario">
-<form action="#" id="formtag" method="POST" onsubmit="return urldecode();">
-<input type="text" name="input" id="input" size="100"/>
-<input type="submit" name="submit" value="URLDecode!"/>
-<a href="#" onclick="textarea()">[Toggle Textarea]</a>
-</form>
-</div>
-<div id="container">
-</div>
-</body>
+      function makeLink(url, text = null) {
+        const a = document.createElement("a");
+        a.href = url;
+        if (text) {
+          a.textContent = text;
+        } else {
+          a.textContent = url;
+        }
+        return a;
+      }
+
+      /**
+       * Makes a dt/dd pair and returns them in a list.
+       */
+      function makeDtDd(dtText, ...ddContent) {
+        const dt = document.createElement("dt");
+        dt.textContent = dtText;
+        const dd = document.createElement("dd");
+        dd.append(...ddContent);
+        return [dt, dd];
+      }
+
+      /**
+       * Decode from the form and put results in the root container
+       */
+      function urldecode() {
+        try {
+          const inputUrl = document.getElementById("input").value;
+          const container = document.getElementById("results");
+          for (const child of container.children) {
+            container.removeChild(child);
+          }
+          const result = urlDecodeImpl(inputUrl);
+          container.appendChild(result);
+        } catch (err) {
+          logError(`Error! ${err}`);
+        }
+      }
+
+      function renderValue(value) {
+        const url = safeParseURL(value);
+        if (url) {
+          return [makeLink(value), urlDecodeImpl(url)];
+        } else {
+          return [value];
+        }
+      }
+
+      function renderQueryString(searchParams) {
+        const dl = document.createElement("dl");
+        for (const entry of searchParams.entries()) {
+          dl.append(...makeDtDd(entry[0], ...renderValue(entry[1])));
+        }
+        return dl;
+      }
+
+      /**
+       * Decode a URL's components and returns a DL with the pieces. Recursively decodes any param that is itself a URL.
+       */
+      function urlDecodeImpl(inputUrl) {
+        const res = document.createElement("div");
+
+        const url = new URL(inputUrl);
+
+        const dl = document.createElement("dl");
+        // Origin
+        dl.append(...makeDtDd("Origin", makeLink(url.origin)));
+
+        // Path
+        dl.append(...makeDtDd("Path", makeText(url.pathname)));
+
+        // Query String
+        dl.append(
+          ...makeDtDd(
+            "Query String",
+            makeText(url.search),
+            renderQueryString(url.searchParams)
+          )
+        );
+
+        // Hash
+        dl.append(...makeDtDd("Hash", makeText(url.hash)));
+
+        res.appendChild(dl);
+        return res;
+      }
+
+      /**
+       * Toggle textarea <-> input for the URL text input control.
+       */
+      function textarea() {
+        const input = document.getElementById("input");
+        var newElement;
+        if (input.tagName === "TEXTAREA") {
+          // textarea -> input
+          newElement = document.createElement("input");
+          newElement.type = "text";
+        } else {
+          // textarea -> input
+          newElement = document.createElement("textarea");
+        }
+        newElement.id = "input";
+        newElement.name = "input";
+        newElement.value = input.value;
+        input.replaceWith(newElement);
+      }
+    </script>
+    <style>
+      dl {
+        margin: 0;
+        border-left: solid 1px #999999;
+        padding-left: 1em;
+      }
+      dd {
+        border-left: solid 1px #999999;
+        padding-left: 1em;
+        margin-left: 1em;
+      }
+      #errorlog {
+        color: darkred;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <input type="text" name="input" id="input" size="100" />
+      <button onclick="urldecode()">URLDecode!</button>
+      <button onclick="textarea()">Toggle Textarea</button>
+    </div>
+    <div id="results"></div>
+    <ul id="errorlog"></ul>
+  </body>
 </html>
