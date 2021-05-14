@@ -78,16 +78,26 @@
           // Does it look like a URL-(re)encoded string?
           const decoded = decodeURIComponent(value);
           if (value != decoded) {
-            return makeDtDd(value, ...renderValue(decoded));
+            return makeDtDd(value, '[URL Encoded]', ...renderValue(decoded));
           }
         }
         {
           // Does it look like base64?
           try {
             const decoded = atob(value);
-            return makeDtDd(value, ...renderValue(decoded));
+            return makeDtDd(value, '[Base64]', ...renderValue(decoded));
           } catch (e) {
             console.error("base64 fail", e);
+          }
+        }
+        {
+          // Does it look like url-safe base64?
+          try {
+            const base64 = value.replaceAll('-', '+').replaceAll('_','/');
+            const decoded = atob(base64);
+            return makeDtDd(value, '[URL-safe Base64]', ...renderValue(decoded));
+          } catch (e) {
+            console.error("url-safe base64 fail", e);
           }
         }
         // Doesn't really look like anything special
