@@ -100,6 +100,13 @@
             console.error("url-safe base64 fail", e);
           }
         }
+        {
+          // Does it look like a JWT?
+          if (/^ey[0-9A-Za-z-_]+\.ey[0-9A-Za-z-_]+\.[0-9A-Za-z-_]+$/.test(value)) {
+            const fields = value.split("\.");
+            return makeDtDd(value, makeText('[JWT]'), makeText('[[Header]]'), ...renderValue(fields[0]), makeText('[[Body]]'), ...renderValue(fields[1]), makeText('[[Signature]]'), makeText(fields[2]));
+          }
+        }
         // Doesn't really look like anything special
         return [makeText(value)];
       }
