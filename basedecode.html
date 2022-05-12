@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Base CoDec</title>
+    <script type="text/javascript">
+      /**
+       * Logs an error to a list at the bottom
+       */
+      function logError(text) {
+        const log = document.createElement("li");
+        log.textContent = text;
+        document.getElementById("errorlog").appendChild(log);
+      }
+
+      function makeText(text) {
+        return document.createTextNode(text);
+      }
+
+      /**
+       * Makes a dt/dd pair and returns them in a list.
+       */
+      function makeDtDd(dtText, ...ddContent) {
+        const dt = document.createElement("dt");
+        dt.textContent = dtText;
+        return [dt].concat(
+          ddContent.map((content) => {
+            const dd = document.createElement("dd");
+            dd.appendChild(content);
+            return dd;
+          })
+        );
+      }
+
+      /**
+       * Decode from the form and put results in the root container
+       */
+      function decode() {
+        try {
+          const input = document.getElementById("input").value;
+          const container = document.getElementById("results");
+          for (const child of container.children) {
+            container.removeChild(child);
+          }
+          const result = decodeImpl(input);
+          container.appendChild(result);
+        } catch (err) {
+          logError(`Error! ${err}`);
+        }
+      }
+
+      function renderValue(value) {
+        {
+          // Does it look like a URL-(re)encoded string?
+          const decoded = decodeURIComponent(value);
+          if (value != decoded) {
+            return makeDtDd(value, makeText('[URL Encoded]'), ...renderValue(decoded));
+          }
+        }
+        {
+          // Does it look like base64?
+          try {
+            const decoded = atob(value);
+            return makeDtDd(value, makeText('[Base64]'), ...renderValue(decoded));
+          } catch (e) {
+            console.error("base64 fail", e);
+          }
+        }
+        {
+          // Does it look like url-safe base64?
+          try {
+            const base64 = value.replaceAll('-', '+').replaceAll('_','/');
+            const decoded = atob(base64);
+            return makeDtDd(value, makeText('[URL-safe Base64]'), ...renderValue(decoded));
+          } catch (e) {
+            console.error("url-safe base64 fail", e);
+          }
+        }
+        // Doesn't really look like anything special
+        return [makeText(value)];
+      }
+
+      function renderQueryString(searchParams) {
+        const dl = document.createElement("dl");
+        for (const entry of searchParams.entries()) {
+          dl.append(...makeDtDd(entry[0], ...renderValue(entry[1])));
+        }
+        return dl;
+      }
+
+      function decodeImpl(value) {
+        const res = document.createElement("div");
+        const dl = document.createElement("dl");
+        dl.append(...makeDtDd("Value", ...renderValue(value)));
+        res.appendChild(dl);
+        return res;
+      }
+
+      /**
+       * Toggle textarea <-> input for the URL text input control.
+       */
+      function textarea() {
+        const input = document.getElementById("input");
+        var newElement;
+        if (input.tagName === "TEXTAREA") {
+          // textarea -> input
+          newElement = document.createElement("input");
+          newElement.type = "text";
+        } else {
+          // textarea -> input
+          newElement = document.createElement("textarea");
+        }
+        newElement.id = "input";
+        newElement.name = "input";
+        newElement.value = input.value;
+        input.replaceWith(newElement);
+      }
+    </script>
+    <style>
+      dl {
+        margin: 0;
+        border-left: solid 1px #999999;
+        padding-left: 1em;
+      }
+      dd {
+        border-left: solid 1px #999999;
+        padding-left: 1em;
+        margin-left: 1em;
+      }
+      #errorlog {
+        color: darkred;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <input type="text" name="input" id="input" size="100" />
+      <button onclick="decode()">Decode</button>
+      <button onclick="textarea()">Toggle Textarea</button>
+    </div>
+    <div id="results"></div>
+    <ul id="errorlog"></ul>
+  </body>
+</html>
