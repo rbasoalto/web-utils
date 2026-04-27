@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+    <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <title>QRcode</title>
+        <script type="text/javascript" src="qrcode.js"></script>
+        <script type="text/javascript">
+            window.addEventListener("load", init);
+        </script>
+        <style type="text/css">
+            div {
+                margin: 30px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="form">
+            <form action="#" onsubmit="return processForm(event);">
+                <input type="text" name="text" id="text" />
+                <input type="submit" name="submit" value="QR!" id="submit" />
+                <button onclick="toggleTextArea()">[Toggle Textarea]</button>
+            </form>
+        </div>
+        <div id="qrcode-container"></div>
+    </body>
+</html>

@@ -4,11 +4,10 @@ This repo contains random everyday web utilities for quick access:
 
 - Pure JS QR code generator
 - URL decoder (decodes query string params, finds urls within, etc)
-- Google API QR code generator
 
 # Acknowledgements
 
-Pure JS QR generator uses [jquery-qrcode](https://github.com/jeromeetienne/jquery-qrcode)
+Pure JS QR generator uses [datalog/qrcode-svg](https://github.com/datalog/qrcode-svg)
 
 # License
 
